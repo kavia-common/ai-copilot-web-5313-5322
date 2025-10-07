@@ -44,7 +44,12 @@ app = FastAPI(
 # Configure CORS to allow frontend requests
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Frontend origin
+    allow_origins=[
+        "http://localhost:3000",
+        "https://localhost:3000",
+        "https://vscode-internal-11461-beta.beta01.cloud.kavia.ai:3000",
+        "http://vscode-internal-11461-beta.beta01.cloud.kavia.ai:3000"
+    ],  # Frontend origins
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
