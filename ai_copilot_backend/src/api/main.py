@@ -3,6 +3,7 @@ FastAPI main application for AI Copilot Backend.
 Provides REST API endpoints for session-based chat using Google Gemini API.
 """
 import uuid
+import re
 from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
@@ -41,16 +42,12 @@ app = FastAPI(
     ]
 )
 
-# Configure CORS to allow frontend requests
+# Configure CORS to allow frontend requests from multiple origins
+# Including localhost for development and preview environments
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "https://localhost:3000",
-        "https://vscode-internal-11461-beta.beta01.cloud.kavia.ai:3000",
-        "http://vscode-internal-11461-beta.beta01.cloud.kavia.ai:3000"
-    ],  # Frontend origins
-    allow_credentials=True,
+    allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$|^https?://.*\.cloud\.kavia\.ai(:\d+)?$|^https?://.*\.kavia\.ai(:\d+)?$",
+    allow_credentials=False,  # Set to False for better cross-origin compatibility
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -80,7 +77,7 @@ def health_check():
     Returns:
         dict: Health status message
     """
-    return {"message": "Healthy"}
+    return {"status": "healthy", "message": "AI Copilot Backend API is running"}
 
 
 # PUBLIC_INTERFACE
