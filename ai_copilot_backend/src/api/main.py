@@ -56,9 +56,12 @@ allowed_origins = [o.strip() for o in allowed_origins_env.split(",") if o.strip(
 
 # Sensible defaults: allow localhost and the current deployment domain
 default_origin_regex = (
-    r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$"
-    r"|^https://vscode-internal-38099-beta\.beta01\.cloud\.kavia\.ai(:\d+)?$"
+    r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$"  # local dev
+    r"|^https://vscode-internal-38099-beta\.beta01\.cloud\.kavia\.ai(:\d+)?$"  # old preview
+    r"|^https://kavia-alb-[\w-]+\.backend\.kavia\.app(:\d+)?$"  # new deployed backend
+    r"|^https://.*\.kavia\.ai(:\d+)?$"  # any frontend under kavia.ai
 )
+
 allowed_origin_regex_env = os.getenv("CORS_ALLOW_ORIGIN_REGEX", "").strip()
 origin_regex_to_use = allowed_origin_regex_env or default_origin_regex
 
