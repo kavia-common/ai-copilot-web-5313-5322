@@ -3,7 +3,6 @@ FastAPI main application for AI Copilot Backend.
 Provides REST API endpoints for session-based chat using Google Gemini API.
 """
 import uuid
-import re
 from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
