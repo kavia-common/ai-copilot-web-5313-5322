@@ -3,7 +3,7 @@ Gemini API service wrapper for generating AI responses.
 Handles communication with Google's Generative AI API.
 """
 import os
-from typing import List, Dict
+from typing import List, Dict, Any
 import google.generativeai as genai
 
 
@@ -101,3 +101,41 @@ class GeminiService:
             True if API key is set, False otherwise
         """
         return bool(self.api_key)
+
+    # PUBLIC_INTERFACE
+    def list_models(self) -> List[Dict[str, Any]]:
+        """
+        List available Gemini models for the configured API key.
+
+        Returns:
+            A list of concise model descriptions containing:
+            - name: API model name
+            - displayName: Human-readable name
+            - inputTokenLimit: Max input tokens (if provided by API)
+            - outputTokenLimit: Max output tokens (if provided by API)
+            - supportedGenerationMethods: Supported methods like 'generateContent', 'embedContent'
+        
+        Raises:
+            Exception: If the SDK call fails
+        """
+        try:
+            models = genai.list_models()  # returns an iterable of Model objects
+            results: List[Dict[str, Any]] = []
+
+            for m in models:
+                # Some fields may be missing on certain models; default safely
+                model_info = {
+                    "name": getattr(m, "name", None),
+                    "displayName": getattr(m, "display_name", None) or getattr(m, "displayName", None),
+                    "inputTokenLimit": getattr(m, "input_token_limit", None) or getattr(m, "inputTokenLimit", None),
+                    "outputTokenLimit": getattr(m, "output_token_limit", None) or getattr(m, "outputTokenLimit", None),
+                    "supportedGenerationMethods": list(getattr(m, "supported_generation_methods", []) or getattr(m, "supportedGenerationMethods", []) or []),
+                }
+
+                # Only include models that expose a name (usable via API)
+                if model_info["name"]:
+                    results.append(model_info)
+
+            return results
+        except Exception as e:
+            raise Exception(f"Failed to list Gemini models: {str(e)}") from e

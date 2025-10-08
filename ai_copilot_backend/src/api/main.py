@@ -12,7 +12,8 @@ from src.models.schemas import (
     ChatResponse,
     SessionCreateResponse,
     Message,
-    HistoryResponse
+    HistoryResponse,
+    ModelsListResponse
 )
 from src.services.gemini_service import GeminiService
 from src.services.session_manager import SessionManager
@@ -37,6 +38,10 @@ app = FastAPI(
         {
             "name": "chat",
             "description": "Chat operations with AI assistant"
+        },
+        {
+            "name": "models",
+            "description": "Model discovery and capabilities"
         }
     ]
 )
@@ -228,3 +233,45 @@ def get_session_history(session_id: str):
         session_id=session_id,
         messages=messages
     )
+
+
+# PUBLIC_INTERFACE
+@app.get(
+    "/api/models",
+    response_model=ModelsListResponse,
+    status_code=status.HTTP_200_OK,
+    tags=["models"],
+    summary="List available Gemini models",
+    description="Return a concise list of available Gemini models for the configured API key, including name, displayName, token limits, and supported methods."
+)
+def list_gemini_models():
+    """
+    List available Gemini models.
+
+    Reads the GEMINI_API_KEY from the environment via the configured GeminiService
+    and uses the SDK to list models. Returns a concise JSON structure.
+
+    Returns:
+        ModelsListResponse: Object containing a list of models and total count
+
+    Raises:
+        HTTPException:
+            - 400 if GEMINI_API_KEY is not set
+            - 500 if an error occurs while calling the Gemini API
+    """
+    # If service couldn't initialize due to missing key, return 400 with a clear message
+    if gemini_service is None or not gemini_service.is_configured():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="GEMINI_API_KEY is missing or not configured. Set it in your environment or .env file."
+        )
+
+    try:
+        models = gemini_service.list_models()
+        return ModelsListResponse(models=models, count=len(models))
+    except Exception as e:
+        # Avoid leaking sensitive internal details; provide a helpful message
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to retrieve Gemini models. Reason: {str(e)}"
+        )

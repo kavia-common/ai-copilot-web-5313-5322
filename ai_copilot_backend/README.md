@@ -85,6 +85,24 @@ The API will be available at:
   - Body: `{ "session_id": "uuid", "message": "your message" }`
   - Returns: `{ "session_id": "uuid", "reply": "AI response" }`
 
+### Models
+- **GET** `/api/models` - List available Gemini models for your API key
+  - Returns: 
+    ```json
+    {
+      "models": [
+        {
+          "name": "models/gemini-1.5-flash",
+          "displayName": "Gemini 1.5 Flash",
+          "inputTokenLimit": 1048576,
+          "outputTokenLimit": 8192,
+          "supportedGenerationMethods": ["generateContent"]
+        }
+      ],
+      "count": 1
+    }
+    ```
+
 ## Configuration
 
 ### CORS Settings
@@ -128,6 +146,37 @@ curl http://localhost:3001/
 ```
 
 Expected response: `{"message": "Healthy"}`
+  
+### 2b. List Available Gemini Models
+
+Ensure your `.env` has `GEMINI_API_KEY` set, then:
+
+```bash
+curl http://localhost:3001/api/models
+```
+
+Expected response (fields may vary by account/region):
+
+```json
+{
+  "models": [
+    {
+      "name": "models/gemini-1.5-flash",
+      "displayName": "Gemini 1.5 Flash",
+      "inputTokenLimit": 1048576,
+      "outputTokenLimit": 8192,
+      "supportedGenerationMethods": ["generateContent"]
+    }
+  ],
+  "count": 1
+}
+```
+
+If the key is missing, you will receive a 400 error:
+```json
+{"detail":"GEMINI_API_KEY is missing or not configured. Set it in your environment or .env file."}
+```
+If your key lacks permissions or an API error occurs, you'll receive a 500 error with a helpful message.
 
 ### 3. Create a Session
 

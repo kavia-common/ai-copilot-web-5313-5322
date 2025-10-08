@@ -2,7 +2,7 @@
 Pydantic schemas for AI Copilot API request and response validation.
 All public models follow OpenAPI standards for documentation.
 """
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel, Field
 
 
@@ -106,3 +106,35 @@ class HistoryResponse(BaseModel):
             {"role": "assistant", "content": "Hi! How can I help you today?"}
         ]
     )
+
+
+# PUBLIC_INTERFACE
+class GeminiModel(BaseModel):
+    """
+    Concise Gemini model information.
+
+    Attributes:
+        name: API model name (e.g., 'models/gemini-1.5-flash')
+        displayName: Human-readable model name
+        inputTokenLimit: Maximum input tokens supported (if provided)
+        outputTokenLimit: Maximum output tokens supported (if provided)
+        supportedGenerationMethods: Supported operations like 'generateContent', 'embedContent'
+    """
+    name: str = Field(..., description="API model name", example="models/gemini-1.5-flash")
+    displayName: Optional[str] = Field(None, description="Human-readable model display name", example="Gemini 1.5 Flash")
+    inputTokenLimit: Optional[int] = Field(None, description="Maximum input token limit for the model", example=1048576)
+    outputTokenLimit: Optional[int] = Field(None, description="Maximum output token limit for the model", example=8192)
+    supportedGenerationMethods: List[str] = Field(default_factory=list, description="Supported generation methods")
+
+
+# PUBLIC_INTERFACE
+class ModelsListResponse(BaseModel):
+    """
+    Response wrapper for models listing.
+
+    Attributes:
+        models: List of available Gemini models with concise information
+        count: Number of models returned
+    """
+    models: List[GeminiModel] = Field(..., description="List of available Gemini models")
+    count: int = Field(..., description="Number of models returned", example=5)
