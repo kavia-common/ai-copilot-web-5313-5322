@@ -5,6 +5,7 @@ Provides REST API endpoints for session-based chat using Google Gemini API.
 import uuid
 from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
+import os
 from dotenv import load_dotenv
 
 from src.models.schemas import (
@@ -46,18 +47,32 @@ app = FastAPI(
     ]
 )
 
-# Configure CORS to allow frontend requests from multiple origins
-# Including localhost for development and preview environments
-app.add_middleware(
-    CORSMiddleware,
-    allow_origin_regex=(
-        r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$"             # local dev
-        r"|^https://vscode-internal-38099-beta\.beta01\.cloud\.kavia\.ai(:\d+)?$"  # your current environment
-    ),
-    allow_credentials=True,   # needed if you're using cookies or Authorization headers
-    allow_methods=["*"],
-    allow_headers=["*"],
+# Configure CORS to allow frontend requests (configurable via environment variables)
+# Environment variables:
+# - CORS_ALLOWED_ORIGINS: Comma-separated list of exact origins (e.g., "http://localhost:3000,https://example.com")
+# - CORS_ALLOW_ORIGIN_REGEX: Optional regex to match allowed origins (overrides default regex)
+allowed_origins_env = os.getenv("CORS_ALLOWED_ORIGINS", "").strip()
+allowed_origins = [o.strip() for o in allowed_origins_env.split(",") if o.strip()]
+
+# Sensible defaults: allow localhost and the current deployment domain
+default_origin_regex = (
+    r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$"
+    r"|^https://vscode-internal-38099-beta\.beta01\.cloud\.kavia\.ai(:\d+)?$"
 )
+allowed_origin_regex_env = os.getenv("CORS_ALLOW_ORIGIN_REGEX", "").strip()
+origin_regex_to_use = allowed_origin_regex_env or default_origin_regex
+
+cors_kwargs = {
+    "allow_credentials": True,   # needed if you're using cookies or Authorization headers
+    "allow_methods": ["*"],
+    "allow_headers": ["*"],
+    "allow_origin_regex": origin_regex_to_use,
+}
+# If explicit origins are provided, include them alongside the regex
+if allowed_origins:
+    cors_kwargs["allow_origins"] = allowed_origins
+
+app.add_middleware(CORSMiddleware, **cors_kwargs)
 
 # Initialize services
 session_manager = SessionManager()

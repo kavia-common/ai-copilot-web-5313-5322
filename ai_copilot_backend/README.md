@@ -7,7 +7,7 @@ FastAPI backend service for the AI Copilot web application. This service manages
 - Session Management: Create and maintain isolated chat sessions with unique UUIDs
 - Gemini API Integration: Leverages Google's Gemini Flash (latest) model for natural language understanding
 - RESTful API: Clean REST endpoints for session and chat operations
-- CORS Enabled: Configured to accept requests from the frontend at `http://localhost:3000`
+- CORS Enabled: Configured to accept requests from localhost and the deployment domain; configurable via environment variables (`CORS_ALLOWED_ORIGINS`, `CORS_ALLOW_ORIGIN_REGEX`)
 - OpenAPI Documentation: Auto-generated API docs available at `/docs`
 
 ## Prerequisites
@@ -110,17 +110,18 @@ The API will be available at:
 The backend is configured to accept requests from:
 - `http://localhost:3000` (default frontend)
 
-To modify allowed origins, edit `src/api/main.py`:
+To modify allowed origins, configure environment variables in your `.env`:
 
-```python
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Update as needed
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+- `CORS_ALLOWED_ORIGINS`: Comma-separated list of exact origins to allow (e.g., `http://localhost:3000,https://your-frontend.example.com`)
+- `CORS_ALLOW_ORIGIN_REGEX`: Optional regex to allow origin patterns; if not set, a safe default allows localhost and the deployment domain.
+
+Example:
 ```
+CORS_ALLOWED_ORIGINS=http://localhost:3000,https://vscode-internal-38099-beta.beta01.cloud.kavia.ai:3000
+# CORS_ALLOW_ORIGIN_REGEX=^https?://(localhost|127\.0\.0\.1)(:\d+)?$|^https://your-domain\.example\.com(:\d+)?$
+```
+
+The backend reads these on startup; no code changes are required for typical updates.
 
 ### Environment Variables
 
@@ -128,6 +129,8 @@ app.add_middleware(
 |----------|-------------|----------|---------|
 | `GEMINI_API_KEY` | Your Google Gemini API key | Yes | None |
 | `GEMINI_MODEL` | Gemini model name to use (e.g., gemini-flash-latest) | No | gemini-flash-latest |
+| `CORS_ALLOWED_ORIGINS` | Comma-separated list of allowed frontend origins (e.g., `http://localhost:3000,https://example.com`) | No | empty (uses regex defaults) |
+| `CORS_ALLOW_ORIGIN_REGEX` | Optional regex to match allowed origins. If set, overrides the default regex used alongside `CORS_ALLOWED_ORIGINS`. | No | Allows localhost and `https://vscode-internal-38099-beta.beta01.cloud.kavia.ai` |
 
 ## Verification Instructions
 
