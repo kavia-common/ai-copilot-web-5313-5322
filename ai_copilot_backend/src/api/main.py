@@ -46,8 +46,11 @@ app = FastAPI(
 # Including localhost for development and preview environments
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$|^https?://.*\.cloud\.kavia\.ai(:\d+)?$|^https?://.*\.kavia\.ai(:\d+)?$",
-    allow_credentials=False,  # Set to False for better cross-origin compatibility
+    allow_origin_regex=(
+        r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$"             # local dev
+        r"|^https://vscode-internal-38099-beta\.beta01\.cloud\.kavia\.ai(:\d+)?$"  # your current environment
+    ),
+    allow_credentials=True,   # needed if you're using cookies or Authorization headers
     allow_methods=["*"],
     allow_headers=["*"],
 )
