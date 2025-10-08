@@ -21,7 +21,7 @@ class GeminiService:
         Initialize the Gemini service.
         
         Reads GEMINI_API_KEY from environment variables and configures the client.
-        Optionally reads GEMINI_MODEL to select a model; defaults to "gemini-1.5-flash".
+        Optionally reads GEMINI_MODEL to select a model; defaults to "gemini-flash-latest".
         
         Raises:
             ValueError: If GEMINI_API_KEY is not set in environment variables
@@ -39,8 +39,8 @@ class GeminiService:
         genai.configure(api_key=self.api_key)
         
         # Initialize the model using environment variable with sensible default
-        # Prefer GEMINI_MODEL with a default of "gemini-1.5-pro"
-        model_name = os.getenv("GEMINI_MODEL", "gemini-1.5-pro")
+        # Prefer GEMINI_MODEL with a default of "gemini-flash-latest"
+        model_name = os.getenv("GEMINI_MODEL", "gemini-flash-latest")
         self.model = genai.GenerativeModel(model_name)
     
     # PUBLIC_INTERFACE

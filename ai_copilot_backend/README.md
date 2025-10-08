@@ -5,7 +5,7 @@ FastAPI backend service for the AI Copilot web application. This service manages
 ## Features
 
 - Session Management: Create and maintain isolated chat sessions with unique UUIDs
-- Gemini API Integration: Leverages Google's Gemini 1.5 Pro model for natural language understanding
+- Gemini API Integration: Leverages Google's Gemini Flash (latest) model for natural language understanding
 - RESTful API: Clean REST endpoints for session and chat operations
 - CORS Enabled: Configured to accept requests from the frontend at `http://localhost:3000`
 - OpenAPI Documentation: Auto-generated API docs available at `/docs`
@@ -127,7 +127,7 @@ app.add_middleware(
 | Variable | Description | Required | Default |
 |----------|-------------|----------|---------|
 | `GEMINI_API_KEY` | Your Google Gemini API key | Yes | None |
-| `GEMINI_MODEL` | Gemini model name to use (e.g., gemini-1.5-pro) | No | gemini-1.5-pro |
+| `GEMINI_MODEL` | Gemini model name to use (e.g., gemini-flash-latest) | No | gemini-flash-latest |
 
 ## Verification Instructions
 
