@@ -114,14 +114,14 @@ class GeminiModel(BaseModel):
     Concise Gemini model information.
 
     Attributes:
-        name: API model name (e.g., 'models/gemini-1.5-flash')
+        name: API model name (e.g., 'models/gemini-1.5-pro')
         displayName: Human-readable model name
         inputTokenLimit: Maximum input tokens supported (if provided)
         outputTokenLimit: Maximum output tokens supported (if provided)
         supportedGenerationMethods: Supported operations like 'generateContent', 'embedContent'
     """
-    name: str = Field(..., description="API model name", example="models/gemini-1.5-flash")
-    displayName: Optional[str] = Field(None, description="Human-readable model display name", example="Gemini 1.5 Flash")
+    name: str = Field(..., description="API model name", example="models/gemini-1.5-pro")
+    displayName: Optional[str] = Field(None, description="Human-readable model display name", example="Gemini 1.5 Pro")
     inputTokenLimit: Optional[int] = Field(None, description="Maximum input token limit for the model", example=1048576)
     outputTokenLimit: Optional[int] = Field(None, description="Maximum output token limit for the model", example=8192)
     supportedGenerationMethods: List[str] = Field(default_factory=list, description="Supported generation methods")

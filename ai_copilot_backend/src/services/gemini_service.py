@@ -39,7 +39,8 @@ class GeminiService:
         genai.configure(api_key=self.api_key)
         
         # Initialize the model using environment variable with sensible default
-        model_name = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
+        # Prefer GEMINI_MODEL with a default of "gemini-1.5-pro"
+        model_name = os.getenv("GEMINI_MODEL", "gemini-1.5-pro")
         self.model = genai.GenerativeModel(model_name)
     
     # PUBLIC_INTERFACE

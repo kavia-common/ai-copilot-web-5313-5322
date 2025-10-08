@@ -4,11 +4,11 @@ FastAPI backend service for the AI Copilot web application. This service manages
 
 ## Features
 
-- **Session Management**: Create and maintain isolated chat sessions with unique UUIDs
-- **Gemini API Integration**: Leverages Google's Gemini 1.5 Flash model for natural language understanding
-- **RESTful API**: Clean REST endpoints for session and chat operations
-- **CORS Enabled**: Configured to accept requests from the frontend at `http://localhost:3000`
-- **OpenAPI Documentation**: Auto-generated API docs available at `/docs`
+- Session Management: Create and maintain isolated chat sessions with unique UUIDs
+- Gemini API Integration: Leverages Google's Gemini 1.5 Pro model for natural language understanding
+- RESTful API: Clean REST endpoints for session and chat operations
+- CORS Enabled: Configured to accept requests from the frontend at `http://localhost:3000`
+- OpenAPI Documentation: Auto-generated API docs available at `/docs`
 
 ## Prerequisites
 
@@ -18,13 +18,13 @@ FastAPI backend service for the AI Copilot web application. This service manages
 
 ## Installation
 
-1. **Install Dependencies**
+1. Install Dependencies
 
    ```bash
    pip install -r requirements.txt
    ```
 
-2. **Configure Environment Variables**
+2. Configure Environment Variables
 
    Create a `.env` file from the example template:
    
@@ -38,7 +38,7 @@ FastAPI backend service for the AI Copilot web application. This service manages
    GEMINI_API_KEY=your_actual_api_key_here
    ```
 
-3. **Obtain a Gemini API Key**
+3. Obtain a Gemini API Key
 
    To get your API key:
    
@@ -47,7 +47,7 @@ FastAPI backend service for the AI Copilot web application. This service manages
    - Click "Create API Key" or "Get API Key"
    - Copy the generated key and paste it into your `.env` file
 
-   **Important**: Keep your API key secure and never commit it to version control.
+   Important: Keep your API key secure and never commit it to version control.
 
 ## Running the Backend
 
@@ -64,36 +64,36 @@ uvicorn src.api.main:app --host 0.0.0.0 --port 3001 --reload
 ```
 
 The API will be available at:
-- **Base URL**: `http://localhost:3001`
-- **API Documentation**: `http://localhost:3001/docs`
-- **OpenAPI Spec**: `http://localhost:3001/openapi.json`
+- Base URL: `http://localhost:3001`
+- API Documentation: `http://localhost:3001/docs`
+- OpenAPI Spec: `http://localhost:3001/openapi.json`
 
 ## API Endpoints
 
 ### Health Check
-- **GET** `/` - Verify the API is running
+- GET `/` - Verify the API is running
 
 ### Session Management
-- **POST** `/api/sessions` - Create a new chat session
+- POST `/api/sessions` - Create a new chat session
   - Returns: `{ "session_id": "uuid" }`
 
-- **GET** `/api/sessions/{session_id}/history` - Retrieve message history for a session
+- GET `/api/sessions/{session_id}/history` - Retrieve message history for a session
   - Returns: `{ "session_id": "uuid", "messages": [...] }`
 
 ### Chat
-- **POST** `/api/chat` - Send a message and receive AI response
+- POST `/api/chat` - Send a message and receive AI response
   - Body: `{ "session_id": "uuid", "message": "your message" }`
   - Returns: `{ "session_id": "uuid", "reply": "AI response" }`
 
 ### Models
-- **GET** `/api/models` - List available Gemini models for your API key
+- GET `/api/models` - List available Gemini models for your API key
   - Returns: 
     ```json
     {
       "models": [
         {
-          "name": "models/gemini-1.5-flash",
-          "displayName": "Gemini 1.5 Flash",
+          "name": "models/gemini-1.5-pro",
+          "displayName": "Gemini 1.5 Pro",
           "inputTokenLimit": 1048576,
           "outputTokenLimit": 8192,
           "supportedGenerationMethods": ["generateContent"]
@@ -127,7 +127,7 @@ app.add_middleware(
 | Variable | Description | Required | Default |
 |----------|-------------|----------|---------|
 | `GEMINI_API_KEY` | Your Google Gemini API key | Yes | None |
-| `GEMINI_MODEL` | Gemini model name to use (e.g., gemini-1.5-flash) | No | gemini-1.5-flash |
+| `GEMINI_MODEL` | Gemini model name to use (e.g., gemini-1.5-pro) | No | gemini-1.5-pro |
 
 ## Verification Instructions
 
@@ -161,8 +161,8 @@ Expected response (fields may vary by account/region):
 {
   "models": [
     {
-      "name": "models/gemini-1.5-flash",
-      "displayName": "Gemini 1.5 Flash",
+      "name": "models/gemini-1.5-pro",
+      "displayName": "Gemini 1.5 Pro",
       "inputTokenLimit": 1048576,
       "outputTokenLimit": 8192,
       "supportedGenerationMethods": ["generateContent"]
@@ -241,15 +241,15 @@ ai_copilot_backend/
 
 ### Error: "GEMINI_API_KEY environment variable is not set"
 
-**Solution**: Ensure you have created a `.env` file with your API key. The backend loads environment variables from this file on startup.
+Solution: Ensure you have created a `.env` file with your API key. The backend loads environment variables from this file on startup.
 
 ### Error: "Service Unavailable" when sending chat messages
 
-**Solution**: Verify your Gemini API key is valid. Try making a test request to the Gemini API directly or regenerate your key from Google AI Studio.
+Solution: Verify your Gemini API key is valid. Try making a test request to the Gemini API directly or regenerate your key from Google AI Studio.
 
 ### CORS errors in browser console
 
-**Solution**: Ensure the frontend is running on `http://localhost:3000`. If using a different port, update the `allow_origins` list in `src/api/main.py`.
+Solution: Ensure the frontend is running on `http://localhost:3000`. If using a different port, update the `allow_origins` list in `src/api/main.py`.
 
 ## Development
 
