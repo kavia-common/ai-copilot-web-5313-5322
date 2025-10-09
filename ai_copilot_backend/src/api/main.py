@@ -58,10 +58,9 @@ allowed_origins = [o.strip() for o in allowed_origins_env.split(",") if o.strip(
 # Added vscode-internal-38099-beta.beta01.cloud.kavia.ai to permit the specified frontend origin
 default_origin_regex = (
     r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$"
-    r"|^https://vscode-internal-31656-beta\.beta01\.cloud\.kavia\.ai:3000$"
-    r"|^https://ai-copilot-web-app-3\.kavia\.app$"
-    r"|^https://ai-copilot-web-app-2\.kavia\.app$"
-    r"|^https://vscode-internal-31656-beta\.beta01\.cloud\.kavia\.ai:3001$"
+    r"|^https://vscode-internal-31656-beta\.beta01\.cloud\.kavia\.ai(:\d+)?$"
+    r"|^https://vscode-internal-38099-beta\.beta01\.cloud\.kavia\.ai(:\d+)?$"
+    r"|^https://kavia-alb-d1caf850-1598685687\.backend\.kavia\.app$"
     r"|^https://kavia-alb-2474e9cb-881246245\.backend\.kavia\.app$"
 )
 
