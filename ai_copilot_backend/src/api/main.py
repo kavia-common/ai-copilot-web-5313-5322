@@ -55,10 +55,15 @@ allowed_origins_env = os.getenv("CORS_ALLOWED_ORIGINS", "").strip()
 allowed_origins = [o.strip() for o in allowed_origins_env.split(",") if o.strip()]
 
 # Sensible defaults: allow localhost and the current deployment domain
+# Added vscode-internal-38099-beta.beta01.cloud.kavia.ai to permit the specified frontend origin
 default_origin_regex = (
     r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$"
+    r"|^https://vscode-internal-31656-beta\.beta01\.cloud\.kavia\.ai(:\d+)?$"
     r"|^https://vscode-internal-38099-beta\.beta01\.cloud\.kavia\.ai(:\d+)?$"
+    r"|^https://kavia-alb-d1caf850-1598685687\.backend\.kavia\.app$"
+    r"|^https://kavia-alb-2474e9cb-881246245\.backend\.kavia\.app$"
 )
+
 allowed_origin_regex_env = os.getenv("CORS_ALLOW_ORIGIN_REGEX", "").strip()
 origin_regex_to_use = allowed_origin_regex_env or default_origin_regex
 
