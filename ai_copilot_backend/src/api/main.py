@@ -62,6 +62,8 @@ default_origin_regex = (
     r"|^https://vscode-internal-32145-beta\.beta01\.cloud\.kavia\.ai:3001$"
     r"|^https://vscode-internal-35991-beta\.beta01\.cloud\.kavia\.ai:3000$"
     r"|^https://vscode-internal-35991-beta\.beta01\.cloud\.kavia\.ai:3001$"
+    r"|^https://vscode-internal-32145-beta\.beta01\.cloud\.kavia\.ai:3000$"
+    r"|^https://vscode-internal-32145-beta\.beta01\.cloud\.kavia\.ai:3001$"
 )
 
 allowed_origin_regex_env = os.getenv("CORS_ALLOW_ORIGIN_REGEX", "").strip()
