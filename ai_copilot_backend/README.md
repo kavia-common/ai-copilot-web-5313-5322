@@ -148,7 +148,10 @@ uvicorn src.api.main:app --host 0.0.0.0 --port 3001
 curl http://localhost:3001/
 ```
 
-Expected response: `{"message": "Healthy"}`
+Expected response:
+```json
+{"status":"healthy","message":"AI Copilot Backend API is running"}
+```
   
 ### 2b. List Available Gemini Models
 
@@ -252,7 +255,17 @@ Solution: Verify your Gemini API key is valid. Try making a test request to the 
 
 ### CORS errors in browser console
 
-Solution: Ensure the frontend is running on `http://localhost:3000`. If using a different port, update the `allow_origins` list in `src/api/main.py`.
+Solution:
+- Ensure the frontend origin matches the allowed origins/regex.
+- For the current preview environment, you may set either an explicit list or rely on the default regex. To explicitly allow:
+```
+CORS_ALLOWED_ORIGINS=https://vscode-internal-32145-beta.beta01.cloud.kavia.ai:3000,https://vscode-internal-35991-beta.beta01.cloud.kavia.ai:3000
+```
+- Or, if overriding the regex:
+```
+CORS_ALLOW_ORIGIN_REGEX=^https?://(localhost|127\.0\.0\.1)(:\d+)?$|^https://vscode-internal-32145-beta\.beta01\.cloud\.kavia\.ai(:\d+)?$|^https://vscode-internal-35991-beta\.beta01\.cloud\.kavia\.ai(:\d+)?$
+```
+Restart the backend after updating env vars.
 
 ## Development
 
