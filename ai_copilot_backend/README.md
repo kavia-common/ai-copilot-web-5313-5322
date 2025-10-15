@@ -72,6 +72,7 @@ The API will be available at:
 
 ### Health Check
 - GET `/` - Verify the API is running
+- GET `/health` - Alternative health endpoint for uptime monitors
 
 ### Session Management
 - POST `/api/sessions` - Create a new chat session
@@ -109,16 +110,23 @@ The API will be available at:
 
 The backend is configured to accept requests from:
 - `http://localhost:3000` (default frontend)
+- `https://<any-subdomain>.beta01.cloud.kavia.ai` (any port), via a safe default regex
 
 To modify allowed origins, configure environment variables in your `.env`:
 
 - `CORS_ALLOWED_ORIGINS`: Comma-separated list of exact origins to allow (e.g., `http://localhost:3000,https://your-frontend.example.com`)
-- `CORS_ALLOW_ORIGIN_REGEX`: Optional regex to allow origin patterns; if not set, a safe default allows localhost and the deployment domain.
+- `CORS_ALLOW_ORIGIN_REGEX`: Optional regex to allow origin patterns; if not set, a safe default allows localhost and wildcard subdomains on `beta01.cloud.kavia.ai`.
+
+Defaults applied by the app:
+- allow_origin_regex: `^https?://(localhost|127\.0\.0\.1)(:\d+)?$|^https://[a-z0-9-]+\.beta01\.cloud\.kavia\.ai(:\d+)?$`
+- allow_methods: `GET, POST, OPTIONS`
+- allow_headers: `Content-Type, Authorization`
+- allow_credentials: `false` (cookies are not used)
 
 Example:
 ```
-CORS_ALLOWED_ORIGINS=http://localhost:3000,https://vscode-internal-38099-beta.beta01.cloud.kavia.ai:3000
-# CORS_ALLOW_ORIGIN_REGEX=^https?://(localhost|127\.0\.0\.1)(:\d+)?$|^https://your-domain\.example\.com(:\d+)?$
+CORS_ALLOWED_ORIGINS=http://localhost:3000,https://vscode-internal-13141-beta.beta01.cloud.kavia.ai:3000
+# CORS_ALLOW_ORIGIN_REGEX=^https?://(localhost|127\.0\.0\.1)(:\d+)?$|^https://[a-z0-9-]+\.beta01\.cloud\.kavia\.ai(:\d+)?$
 ```
 
 The backend reads these on startup; no code changes are required for typical updates.
@@ -130,7 +138,7 @@ The backend reads these on startup; no code changes are required for typical upd
 | `GEMINI_API_KEY` | Your Google Gemini API key | Yes | None |
 | `GEMINI_MODEL` | Gemini model name to use (e.g., gemini-flash-latest) | No | gemini-flash-latest |
 | `CORS_ALLOWED_ORIGINS` | Comma-separated list of allowed frontend origins (e.g., `http://localhost:3000,https://example.com`) | No | empty (uses regex defaults) |
-| `CORS_ALLOW_ORIGIN_REGEX` | Optional regex to match allowed origins. If set, overrides the default regex used alongside `CORS_ALLOWED_ORIGINS`. | No | Allows localhost and `https://vscode-internal-38099-beta.beta01.cloud.kavia.ai` |
+| `CORS_ALLOW_ORIGIN_REGEX` | Optional regex to match allowed origins. If set, overrides the default regex used alongside `CORS_ALLOWED_ORIGINS`. | No | Allows localhost and wildcard subdomains on `beta01.cloud.kavia.ai` |
 
 ## Verification Instructions
 
@@ -257,13 +265,14 @@ Solution: Verify your Gemini API key is valid. Try making a test request to the 
 
 Solution:
 - Ensure the frontend origin matches the allowed origins/regex.
-- For the current preview environment, you may set either an explicit list or rely on the default regex. To explicitly allow:
+- Default regex allows localhost and wildcard subdomains on `beta01.cloud.kavia.ai`.
+- To explicitly allow specific origins:
 ```
-CORS_ALLOWED_ORIGINS=https://vscode-internal-32145-beta.beta01.cloud.kavia.ai:3000,https://vscode-internal-35991-beta.beta01.cloud.kavia.ai:3000
+CORS_ALLOWED_ORIGINS=https://vscode-internal-13141-beta.beta01.cloud.kavia.ai:3000
 ```
-- Or, if overriding the regex:
+- Or, to override the regex entirely:
 ```
-CORS_ALLOW_ORIGIN_REGEX=^https?://(localhost|127\.0\.0\.1)(:\d+)?$|^https://vscode-internal-32145-beta\.beta01\.cloud\.kavia\.ai(:\d+)?$|^https://vscode-internal-35991-beta\.beta01\.cloud\.kavia\.ai(:\d+)?$
+CORS_ALLOW_ORIGIN_REGEX=^https?://(localhost|127\.0\.0\.1)(:\d+)?$|^https://[a-z0-9-]+\.beta01\.cloud\.kavia\.ai(:\d+)?$
 ```
 Restart the backend after updating env vars.
 

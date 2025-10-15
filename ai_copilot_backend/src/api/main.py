@@ -3,10 +3,11 @@ FastAPI main application for AI Copilot Backend.
 Provides REST API endpoints for session-based chat using Google Gemini API.
 """
 import uuid
+import os
+
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
-import os
-from dotenv import load_dotenv
 
 from src.models.schemas import (
     ChatRequest,
@@ -47,34 +48,50 @@ app = FastAPI(
     ]
 )
 
-# Configure CORS to allow frontend requests (configurable via environment variables)
-# Environment variables:
-# - CORS_ALLOWED_ORIGINS: Comma-separated list of exact origins (e.g., "http://localhost:3000,https://example.com")
-# - CORS_ALLOW_ORIGIN_REGEX: Optional regex to match allowed origins (overrides default regex)
+# -----------------------------------------------------------------------------
+# CORS Configuration
+# -----------------------------------------------------------------------------
+# PUBLIC NOTE:
+# CORS behavior can be customized via:
+#   - CORS_ALLOWED_ORIGINS: Comma-separated list of exact origins to allow
+#   - CORS_ALLOW_ORIGIN_REGEX: Optional regex to allow origin patterns
+#
+# Defaults below allow:
+#   - http://localhost / http://127.0.0.1 (any port)
+#   - https://<any-subdomain>.beta01.cloud.kavia.ai (any port)
+#
+# For the current deployment, the frontend runs at:
+#   https://vscode-internal-13141-beta.beta01.cloud.kavia.ai:3000
+# and the backend at:
+#   https://vscode-internal-13141-beta.beta01.cloud.kavia.ai:3001
+#
+# We intentionally set:
+#   - allow_credentials=False (no cookies used)
+#   - allow_methods=["GET", "POST", "OPTIONS"]
+#   - allow_headers=["Content-Type", "Authorization"]
+# -----------------------------------------------------------------------------
 allowed_origins_env = os.getenv("CORS_ALLOWED_ORIGINS", "").strip()
 allowed_origins = [o.strip() for o in allowed_origins_env.split(",") if o.strip()]
 
-# Sensible defaults: allow localhost and the current deployment domain
-# Include current preview origins for both frontend (3000) and backend (3001)
 default_origin_regex = (
     r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$"
-    r"|^https://vscode-internal-32145-beta\.beta01\.cloud\.kavia\.ai:3000$"
-    r"|^https://vscode-internal-32145-beta\.beta01\.cloud\.kavia\.ai:3001$"
-    r"|^https://vscode-internal-35991-beta\.beta01\.cloud\.kavia\.ai:3000$"
-    r"|^https://vscode-internal-35991-beta\.beta01\.cloud\.kavia\.ai:3001$"
-    r"|^https://vscode-internal-32145-beta\.beta01\.cloud\.kavia\.ai:3000$"
-    r"|^https://vscode-internal-32145-beta\.beta01\.cloud\.kavia\.ai:3001$"
+    r"|^https://[a-z0-9-]+\.beta01\.cloud\.kavia\.ai(:\d+)?$"
 )
 
 allowed_origin_regex_env = os.getenv("CORS_ALLOW_ORIGIN_REGEX", "").strip()
 origin_regex_to_use = allowed_origin_regex_env or default_origin_regex
 
 cors_kwargs = {
-    "allow_credentials": True,   # needed if you're using cookies or Authorization headers
-    "allow_methods": ["*"],
-    "allow_headers": ["*"],
+    # We are not using cookies; keep credentials disabled
+    "allow_credentials": False,
+    # Restrict to standard browser methods including preflight
+    "allow_methods": ["GET", "POST", "OPTIONS"],
+    # Only allow necessary headers for typical API calls
+    "allow_headers": ["Content-Type", "Authorization"],
+    # Use regex to safely allow wildcard subdomains on beta01.cloud.kavia.ai
     "allow_origin_regex": origin_regex_to_use,
 }
+
 # If explicit origins are provided, include them alongside the regex
 if allowed_origins:
     cors_kwargs["allow_origins"] = allowed_origins
@@ -88,6 +105,7 @@ session_manager = SessionManager()
 try:
     gemini_service = GeminiService()
 except ValueError as e:
+    # Avoid crashing the app; endpoints will respond with helpful errors
     print(f"Warning: {e}")
     gemini_service = None
 
@@ -102,9 +120,26 @@ except ValueError as e:
 def health_check():
     """
     Health check endpoint.
-    
+
     Returns:
         dict: Health status message
+    """
+    return {"status": "healthy", "message": "AI Copilot Backend API is running"}
+
+
+# PUBLIC_INTERFACE
+@app.get(
+    "/health",
+    tags=["health"],
+    summary="Health check",
+    description="Secondary health endpoint for uptime monitors and load balancers"
+)
+def health_check_alt():
+    """
+    Secondary health check endpoint.
+
+    Returns:
+        dict: Health status message (same as root health check)
     """
     return {"status": "healthy", "message": "AI Copilot Backend API is running"}
 
@@ -121,15 +156,15 @@ def health_check():
 def create_session():
     """
     Create a new chat session.
-    
+
     Generates a unique session ID and initializes an empty message history.
-    
+
     Returns:
         SessionCreateResponse: Object containing the new session_id
     """
     session_id = str(uuid.uuid4())
     session_manager.create_session(session_id)
-    
+
     return SessionCreateResponse(session_id=session_id)
 
 
@@ -145,16 +180,16 @@ def create_session():
 def chat(request: ChatRequest):
     """
     Send a chat message and get AI response.
-    
+
     Validates the session, adds the user message to history,
     generates an AI reply using Gemini API, and stores the assistant's response.
-    
+
     Args:
         request: ChatRequest containing session_id and message
-        
+
     Returns:
         ChatResponse: Object containing session_id and AI reply
-        
+
     Raises:
         HTTPException: If session doesn't exist, Gemini service is unavailable,
                       or API call fails
@@ -165,14 +200,14 @@ def chat(request: ChatRequest):
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Gemini API is not configured. Please set GEMINI_API_KEY environment variable."
         )
-    
+
     # Validate session exists
     if not session_manager.session_exists(request.session_id):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Session {request.session_id} not found. Please create a session first."
         )
-    
+
     try:
         # Add user message to history
         session_manager.add_message(
@@ -180,32 +215,32 @@ def chat(request: ChatRequest):
             role="user",
             content=request.message
         )
-        
+
         # Get conversation history
         history = session_manager.get_history(request.session_id)
-        
+
         # Remove the just-added user message from history for API call
         # (we'll pass it separately)
         history_for_api = history[:-1] if len(history) > 1 else []
-        
+
         # Generate AI reply
         ai_reply = gemini_service.generate_reply(
             history=history_for_api,
             user_message=request.message
         )
-        
+
         # Add assistant message to history
         session_manager.add_message(
             request.session_id,
             role="assistant",
             content=ai_reply
         )
-        
+
         return ChatResponse(
             session_id=request.session_id,
             reply=ai_reply
         )
-        
+
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -225,32 +260,32 @@ def chat(request: ChatRequest):
 def get_session_history(session_id: str):
     """
     Retrieve message history for a session.
-    
+
     Returns all messages in chronological order for the specified session.
-    
+
     Args:
         session_id: The session identifier
-        
+
     Returns:
         HistoryResponse: Object containing session_id and list of messages
-        
+
     Raises:
         HTTPException: If session doesn't exist
     """
     history = session_manager.get_history(session_id)
-    
+
     if history is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Session {session_id} not found"
         )
-    
+
     # Convert history to Message objects
     messages = [
         Message(role=msg["role"], content=msg["content"])
         for msg in history
     ]
-    
+
     return HistoryResponse(
         session_id=session_id,
         messages=messages
